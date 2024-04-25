@@ -2,7 +2,6 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -29,6 +28,16 @@ impl Graph for UndirectedGraph {
         &self.adjacency_table
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
+        let (node_a, node_b, dist) = edge;
+        println!("node: {}, node: {}",node_a, node_b);
+        if !self.contains(node_a){
+            self.add_node(node_a);
+        }
+        if !self.contains(node_b){
+            self.add_node(node_b);
+        }
+        self.adjacency_table_mutable().get_mut(node_a).unwrap().push((node_b.to_string(), dist));
+        self.adjacency_table_mutable().get_mut(node_b).unwrap().push((node_a.to_string(), dist));
         //TODO
     }
 }
@@ -38,9 +47,15 @@ pub trait Graph {
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
         //TODO
-		true
+        match self.adjacency_table_mutable().insert(node.to_string(), vec![]){
+            None => false,
+            _ => true
+        }
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
+        let (node_a, node_b, dist) = edge;
+        self.add_node(node_a);
+        self.adjacency_table_mutable().get_mut(node_a).unwrap().push((node_b.to_string(), dist));
         //TODO
     }
     fn contains(&self, node: &str) -> bool {
@@ -77,6 +92,10 @@ mod test_undirected_graph {
             (&String::from("b"), &String::from("c"), 10),
             (&String::from("c"), &String::from("b"), 10),
         ];
+        for edge in graph.edges(){
+            let (node_a, node_b, dist) = edge;
+            println!("node: {}, node: {}, dist: {}", node_a, node_b, dist);
+        }
         for edge in expected_edges.iter() {
             assert_eq!(graph.edges().contains(edge), true);
         }

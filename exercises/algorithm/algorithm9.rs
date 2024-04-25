@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +22,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![],
             comparator,
         }
     }
@@ -38,18 +37,26 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.items.push(value); // Add the new element to the end.
+        self.count += 1;
+        println!("count = {} len = {}",self.count, self.items.len());
+        let mut idx = self.count-1;
+        // Bubble up to restore the heap property.
+        while idx > 0 && (self.comparator)(&self.items[idx], &self.items[(idx-1)/2]) {
+            self.items.swap(idx, (idx-1)/2);
+            idx = (idx-1)/2;
+        }
     }
-
     fn parent_idx(&self, idx: usize) -> usize {
-        idx / 2
+        (idx-1) / 2
     }
 
     fn children_present(&self, idx: usize) -> bool {
-        self.left_child_idx(idx) <= self.count
+        self.left_child_idx(idx) < self.count
     }
 
     fn left_child_idx(&self, idx: usize) -> usize {
-        idx * 2
+        idx * 2 + 1
     }
 
     fn right_child_idx(&self, idx: usize) -> usize {
@@ -57,8 +64,15 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+
+        // Check if the right child exists and compare the children.
+        if right_idx < self.count && (self.comparator)(&self.items[right_idx], &self.items[left_idx]) {
+            right_idx
+        } else {
+            left_idx
+        }
     }
 }
 
@@ -82,11 +96,32 @@ where
     T: Default,
 {
     type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.count == 0 {
+            None
+        } else {
+            let min = self.items.swap_remove(0); // Remove the root and put the last element there.
+            // println!("min: {:?}", min);
+            self.count -= 1;
 
-    fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+            if self.count > 0 {
+                // Move the new root down to restore heap order.
+                let mut idx = 0;
+                while self.children_present(idx) {
+                    let smallest_child_index = self.smallest_child_idx(idx);
+
+                    if (self.comparator)(&self.items[smallest_child_index], &self.items[idx]) {
+                        self.items.swap(idx, smallest_child_index);
+                        idx = smallest_child_index;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            Some(min)
+        }
     }
+
 }
 
 pub struct MinHeap;
