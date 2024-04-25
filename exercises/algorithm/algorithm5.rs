@@ -30,7 +30,6 @@ impl Graph {
         
 		//TODO
 
-        let mut visit_order = vec![];
         visit_order
     }
 }

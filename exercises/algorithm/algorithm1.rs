@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +28,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: Ord + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: Ord + Clone > LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -72,11 +71,39 @@ impl<T> LinkedList<T> {
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
+		let mut ret = Self {
             length: 0,
             start: None,
             end: None,
-        }
+        };
+        let mut cur_a = list_a.start;
+        let mut cur_b = list_b.start;
+        while cur_a.is_some() || cur_b.is_some(){
+            match (cur_a, cur_b) {
+                (None, None) => {break;},
+                (Some(node_a), None) => {
+                    ret.add(unsafe{(*node_a.as_ptr()).val.clone()});
+                    cur_a = unsafe{(*node_a.as_ptr()).next};
+                },
+                (None, Some(node_b)) => {
+                    ret.add(unsafe{(*node_b.as_ptr()).val.clone()});
+                    cur_b = unsafe{(*node_b.as_ptr()).next};
+                },
+                (Some(node_a), Some(node_b)) =>{
+                    let a = unsafe{&(*node_a.as_ptr()).val.clone()};
+                    let b = unsafe{&(*node_b.as_ptr()).val.clone()};
+                    if a > b {
+                        ret.add(b.clone());
+                        cur_b = unsafe{(*node_b.as_ptr()).next};
+                    }else{
+                        ret.add(a.clone());
+                        cur_a = unsafe{(*node_a.as_ptr()).next}; 
+                    }
+                }
+            }
+            ret.length += 1;
+        } 
+        ret
 	}
 }
 
